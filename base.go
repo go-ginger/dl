@@ -4,7 +4,7 @@ import "github.com/kulichak/models"
 
 type IBaseDbHandler interface {
 	BeforeInsert(request *models.Request)
-	Insert(request *models.Request) (*models.IBaseModel, error)
+	Insert(request *models.Request) (interface{}, error)
 	AfterInsert(request *models.Request)
 
 	BeforeQuery(request *models.Request)
