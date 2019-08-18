@@ -4,6 +4,7 @@ import "github.com/kulichak/models"
 
 
 func (base *BaseDbHandler) BeforeDelete(request *models.Request) {
+	request.Body.HandleDeleteDefaultValues()
 }
 
 func (base *BaseDbHandler) AfterDelete(request *models.Request) {
