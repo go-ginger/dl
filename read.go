@@ -1,7 +1,6 @@
 package dl
 
 import (
-	"fmt"
 	"github.com/kulichak/models"
 	"reflect"
 	"strings"
@@ -10,8 +9,13 @@ import (
 func (base *BaseDbHandler) BeforeQuery(request *models.Request) {
 }
 
-func (base *BaseDbHandler) handleModelAfterQuery(model interface{}) {
-	s := reflect.ValueOf(model).Elem()
+func (base *BaseDbHandler) handleModelAfterQuery(model interface{}, isValue bool) {
+	var s reflect.Value
+	if !isValue {
+		s = reflect.ValueOf(model).Elem()
+	}else {
+		s = model.(reflect.Value)
+	}
 	typeOfT := s.Type()
 
 	for i := 0; i < s.NumField(); i++ {
@@ -21,15 +25,13 @@ func (base *BaseDbHandler) handleModelAfterQuery(model interface{}) {
 		if ok {
 			tagParts := strings.Split(tag, ",")
 			eventName, targetFieldName := tagParts[0], tagParts[1]
-			fmt.Println(eventName)
-			fmt.Println(targetFieldName)
-			val := f.String()
-			result, ok := TryEvent(eventName, fType.Name, val)
-			if ok {
+			val := f.Interface()
+			result, handled := TryEvent(eventName, fType.Name, val)
+			if handled {
 				targetField := s.FieldByName(targetFieldName)
 				if targetField.IsValid() {
 					if f.CanSet() {
-						f.Set(reflect.ValueOf(result))
+						targetField.Set(reflect.ValueOf(result))
 					}
 				}
 			}
@@ -39,10 +41,11 @@ func (base *BaseDbHandler) handleModelAfterQuery(model interface{}) {
 
 func (base *BaseDbHandler) AfterQuery(request *models.Request) {
 	if request.Model != nil {
-		base.handleModelAfterQuery(request.Model)
+		base.handleModelAfterQuery(request.Model, false)
 	} else if request.Models != nil {
-		for _, model := range request.Models.([]interface{}) {
-			base.handleModelAfterQuery(model)
+		s := reflect.ValueOf(request.Models).Elem()
+		for i := 0; i < s.Len(); i++ {
+			base.handleModelAfterQuery(s.Index(i), true)
 		}
 	}
 }

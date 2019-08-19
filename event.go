@@ -2,20 +2,21 @@ package dl
 
 type Event struct {
 	Name     string
-	Callback func(fieldName, value string) interface{}
+	Callback func(fieldName string, value interface{}) interface{}
 }
 
-var events map[string]*Event
+var events = map[string]*Event{}
 
-func AddNewEvent(eventName string, callback func(fieldName, value string) interface{}) {
+func AddNewEvent(eventName string, callback func(fieldName string, value interface{}) interface{}) {
 	events[eventName] = &Event{
 		Name:     eventName,
 		Callback: callback,
 	}
 }
 
-func TryEvent(eventName, fieldName, value string) (result interface{}, ok bool) {
-	if event, ok := events[eventName]; ok {
+func TryEvent(eventName, fieldName string, value interface{}) (result interface{}, ok bool) {
+	if event, exists := events[eventName]; exists {
+		ok = true
 		result = event.Callback(fieldName, value)
 	}
 	return
