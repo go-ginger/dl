@@ -7,13 +7,22 @@ import (
 )
 
 func (base *BaseDbHandler) BeforeQuery(request *models.Request) {
+	if request.Sort == nil || len(*request.Sort) == 0 {
+		// default sort with id desc
+		request.Sort = &[]models.SortItem{
+			{
+				Name:      "id",
+				Ascending: false,
+			},
+		}
+	}
 }
 
 func (base *BaseDbHandler) handleModelAfterQuery(model interface{}, isValue bool) {
 	var s reflect.Value
 	if !isValue {
 		s = reflect.ValueOf(model).Elem()
-	}else {
+	} else {
 		s = model.(reflect.Value)
 	}
 	typeOfT := s.Type()
