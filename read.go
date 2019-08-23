@@ -18,7 +18,7 @@ func (base *BaseDbHandler) BeforeQuery(request *models.Request) {
 	}
 }
 
-func (base *BaseDbHandler) handleModelAfterQuery(model interface{}, isValue bool) {
+func (base *BaseDbHandler) handleModelAfterQuery(request *models.Request, model interface{}, isValue bool) {
 	var s reflect.Value
 	if !isValue {
 		s = reflect.ValueOf(model).Elem()
@@ -27,20 +27,22 @@ func (base *BaseDbHandler) handleModelAfterQuery(model interface{}, isValue bool
 	}
 	typeOfT := s.Type()
 
-	for i := 0; i < s.NumField(); i++ {
-		f := s.Field(i)
-		fType := typeOfT.Field(i)
-		tag, ok := fType.Tag.Lookup("load")
-		if ok {
-			tagParts := strings.Split(tag, ",")
-			eventName, targetFieldName := tagParts[0], tagParts[1]
-			val := f.Interface()
-			result, handled := TryEvent(eventName, fType.Name, val)
-			if handled {
-				targetField := s.FieldByName(targetFieldName)
-				if targetField.IsValid() {
-					if f.CanSet() {
-						targetField.Set(reflect.ValueOf(result))
+	if doLoad, ok := request.Tags["load"]; !ok || doLoad {
+		for i := 0; i < s.NumField(); i++ {
+			f := s.Field(i)
+			fType := typeOfT.Field(i)
+			tag, ok := fType.Tag.Lookup("load")
+			if ok {
+				tagParts := strings.Split(tag, ",")
+				eventName, targetFieldName := tagParts[0], tagParts[1]
+				val := f.Interface()
+				result, handled := TryEvent(eventName, fType.Name, val)
+				if handled {
+					targetField := s.FieldByName(targetFieldName)
+					if targetField.IsValid() {
+						if f.CanSet() {
+							targetField.Set(reflect.ValueOf(result))
+						}
 					}
 				}
 			}
@@ -50,11 +52,11 @@ func (base *BaseDbHandler) handleModelAfterQuery(model interface{}, isValue bool
 
 func (base *BaseDbHandler) AfterQuery(request *models.Request) {
 	if request.Model != nil {
-		base.handleModelAfterQuery(request.Model, false)
+		base.handleModelAfterQuery(request, request.Model, false)
 	} else if request.Models != nil {
 		s := reflect.ValueOf(request.Models).Elem()
 		for i := 0; i < s.Len(); i++ {
-			base.handleModelAfterQuery(s.Index(i), true)
+			base.handleModelAfterQuery(request, s.Index(i), true)
 		}
 	}
 }
