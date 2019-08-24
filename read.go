@@ -6,10 +6,11 @@ import (
 	"strings"
 )
 
-func (base *BaseDbHandler) BeforeQuery(request *models.Request) {
-	if request.Sort == nil || len(*request.Sort) == 0 {
+func (base *BaseDbHandler) BeforeQuery(request models.IRequest) {
+	req := request.GetBaseRequest()
+	if req.Sort == nil || len(*req.Sort) == 0 {
 		// default sort with id desc
-		request.Sort = &[]models.SortItem{
+		req.Sort = &[]models.SortItem{
 			{
 				Name:      "id",
 				Ascending: false,
@@ -18,7 +19,7 @@ func (base *BaseDbHandler) BeforeQuery(request *models.Request) {
 	}
 }
 
-func (base *BaseDbHandler) handleModelAfterQuery(request *models.Request, model interface{}, isValue bool) {
+func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model interface{}, isValue bool) {
 	var s reflect.Value
 	if !isValue {
 		s = reflect.ValueOf(model).Elem()
@@ -27,7 +28,8 @@ func (base *BaseDbHandler) handleModelAfterQuery(request *models.Request, model 
 	}
 	typeOfT := s.Type()
 
-	if doLoad, ok := request.Tags["load"]; !ok || doLoad {
+	req := request.GetBaseRequest()
+	if doLoad, ok := req.Tags["load"]; !ok || doLoad {
 		for i := 0; i < s.NumField(); i++ {
 			f := s.Field(i)
 			fType := typeOfT.Field(i)
@@ -50,21 +52,22 @@ func (base *BaseDbHandler) handleModelAfterQuery(request *models.Request, model 
 	}
 }
 
-func (base *BaseDbHandler) AfterQuery(request *models.Request) {
-	if request.Model != nil {
-		base.handleModelAfterQuery(request, request.Model, false)
-	} else if request.Models != nil {
-		s := reflect.ValueOf(request.Models).Elem()
+func (base *BaseDbHandler) AfterQuery(request models.IRequest) {
+	req := request.GetBaseRequest()
+	if req.Model != nil {
+		base.handleModelAfterQuery(request, req.Model, false)
+	} else if req.Models != nil {
+		s := reflect.ValueOf(req.Models).Elem()
 		for i := 0; i < s.Len(); i++ {
 			base.handleModelAfterQuery(request, s.Index(i), true)
 		}
 	}
 }
 
-func (base *BaseDbHandler) Paginate(request *models.Request) (*models.PaginateResult, error) {
+func (base *BaseDbHandler) Paginate(request models.IRequest) (*models.PaginateResult, error) {
 	return nil, nil
 }
 
-func (base *BaseDbHandler) Get(request *models.Request) (*models.IBaseModel, error) {
+func (base *BaseDbHandler) Get(request models.IRequest) (*models.IBaseModel, error) {
 	return nil, nil
 }
