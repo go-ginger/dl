@@ -68,6 +68,6 @@ func (base *BaseDbHandler) Paginate(request models.IRequest) (*models.PaginateRe
 	return nil, nil
 }
 
-func (base *BaseDbHandler) Get(request models.IRequest) (*models.IBaseModel, error) {
+func (base *BaseDbHandler) Get(request models.IRequest) (models.IBaseModel, error) {
 	return nil, nil
 }

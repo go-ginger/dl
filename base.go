@@ -9,7 +9,7 @@ type IBaseDbHandler interface {
 
 	BeforeQuery(request models.IRequest)
 	Paginate(request models.IRequest) (*models.PaginateResult, error)
-	Get(request models.IRequest) (*models.IBaseModel, error)
+	Get(request models.IRequest) (models.IBaseModel, error)
 	AfterQuery(request models.IRequest)
 
 	BeforeUpdate(request models.IRequest)
