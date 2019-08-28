@@ -24,6 +24,7 @@ func TryEvent(eventName, fieldName string, value interface{}) (result interface{
 			if v.IsNil() {
 				return
 			}
+			value = v.Elem().Interface()
 		}
 		ok = true
 		eventResult, err := event.Callback(fieldName, value)
