@@ -1,6 +1,6 @@
 package dl
 
-import "github.com/kulichak/models"
+import "github.com/go-ginger/models"
 
 func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) {
 	req := request.GetBaseRequest()

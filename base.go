@@ -1,6 +1,6 @@
 package dl
 
-import "github.com/kulichak/models"
+import "github.com/go-ginger/models"
 
 type IBaseDbHandler interface {
 	BeforeInsert(request models.IRequest)
