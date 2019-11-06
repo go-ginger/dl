@@ -24,6 +24,10 @@ type IBaseDbHandler interface {
 	Update(request models.IRequest) error
 	AfterUpdate(request models.IRequest)
 
+	BeforeUpsert(request models.IRequest)
+	Upsert(request models.IRequest) error
+	AfterUpsert(request models.IRequest)
+
 	BeforeDelete(request models.IRequest)
 	Delete(request models.IRequest) error
 	AfterDelete(request models.IRequest)
