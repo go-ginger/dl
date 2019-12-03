@@ -4,7 +4,7 @@ import "github.com/go-ginger/models"
 
 func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) {
 	req := request.GetBaseRequest()
-	req.Body.HandleUpdateDefaultValues()
+	req.Body.HandleUpsertDefaultValues()
 }
 
 func (base *BaseDbHandler) AfterUpsert(request models.IRequest) {
