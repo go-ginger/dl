@@ -2,10 +2,11 @@ package dl
 
 import "github.com/go-ginger/models"
 
-
 func (base *BaseDbHandler) BeforeDelete(request models.IRequest) {
 	req := request.GetBaseRequest()
-	req.Body.HandleDeleteDefaultValues()
+	if req.Body != nil {
+		req.Body.HandleDeleteDefaultValues()
+	}
 }
 
 func (base *BaseDbHandler) AfterDelete(request models.IRequest) {
