@@ -26,12 +26,12 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 	} else {
 		s = model.(reflect.Value)
 	}
-	typeOfT := base.ModelType
+	typeOfT := s.Type()
 
 	req := request.GetBaseRequest()
 	if doLoad, ok := req.Tags["load"]; !ok || doLoad {
-		for i := 0; i < base.Model.NumField(); i++ {
-			f := base.Model.Field(i)
+		for i := 0; i < s.NumField(); i++ {
+			f := s.Field(i)
 			fType := typeOfT.Field(i)
 			tag, ok := fType.Tag.Lookup("load")
 			if ok {
@@ -54,9 +54,8 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 
 func (base *BaseDbHandler) AfterQuery(request models.IRequest, result interface{}) {
 	if pr, ok := result.(*models.PaginateResult); ok {
-		s := reflect.ValueOf(pr.Items)
-		for i := 0; i < s.Len(); i++ {
-			base.handleModelAfterQuery(request, s.Index(i), true)
+		for _, item := range pr.Items {
+			base.handleModelAfterQuery(request, item, false)
 		}
 	} else {
 		base.handleModelAfterQuery(request, result, false)
