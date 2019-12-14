@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (base *BaseDbHandler) BeforeQuery(request models.IRequest) {
+func (base *BaseDbHandler) BeforeQuery(request models.IRequest) (err error) {
 	req := request.GetBaseRequest()
 	if req.Sort == nil || len(*req.Sort) == 0 {
 		// default sort with id desc
@@ -17,6 +17,7 @@ func (base *BaseDbHandler) BeforeQuery(request models.IRequest) {
 			},
 		}
 	}
+	return
 }
 
 func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model interface{}, isValue bool) {
@@ -52,7 +53,7 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 	}
 }
 
-func (base *BaseDbHandler) AfterQuery(request models.IRequest, result interface{}) {
+func (base *BaseDbHandler) AfterQuery(request models.IRequest, result interface{}) (err error) {
 	if pr, ok := result.(*models.PaginateResult); ok {
 		for _, item := range pr.Items {
 			base.handleModelAfterQuery(request, item, false)
@@ -60,6 +61,7 @@ func (base *BaseDbHandler) AfterQuery(request models.IRequest, result interface{
 	} else {
 		base.handleModelAfterQuery(request, result, false)
 	}
+	return
 }
 
 func (base *BaseDbHandler) Paginate(request models.IRequest) (*models.PaginateResult, error) {

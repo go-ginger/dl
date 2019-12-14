@@ -11,26 +11,26 @@ type IBaseDbHandler interface {
 	GetModelsInstance() interface{}
 	GetModelInstance() interface{}
 
-	BeforeInsert(request models.IRequest)
+	BeforeInsert(request models.IRequest) (err error)
 	Insert(request models.IRequest) (interface{}, error)
-	AfterInsert(request models.IRequest)
+	AfterInsert(request models.IRequest) (err error)
 
-	BeforeQuery(request models.IRequest)
+	BeforeQuery(request models.IRequest) (err error)
 	Paginate(request models.IRequest) (*models.PaginateResult, error)
 	Get(request models.IRequest) (models.IBaseModel, error)
-	AfterQuery(request models.IRequest, result interface{})
+	AfterQuery(request models.IRequest, result interface{}) (err error)
 
-	BeforeUpdate(request models.IRequest)
+	BeforeUpdate(request models.IRequest) (err error)
 	Update(request models.IRequest) error
-	AfterUpdate(request models.IRequest)
+	AfterUpdate(request models.IRequest) (err error)
 
-	BeforeUpsert(request models.IRequest)
+	BeforeUpsert(request models.IRequest) (err error)
 	Upsert(request models.IRequest) error
-	AfterUpsert(request models.IRequest)
+	AfterUpsert(request models.IRequest) (err error)
 
-	BeforeDelete(request models.IRequest)
+	BeforeDelete(request models.IRequest) (err error)
 	Delete(request models.IRequest) error
-	AfterDelete(request models.IRequest)
+	AfterDelete(request models.IRequest) (err error)
 }
 
 type BaseDbHandler struct {
