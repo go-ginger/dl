@@ -55,8 +55,11 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 
 func (base *BaseDbHandler) AfterQuery(request models.IRequest, result interface{}) (err error) {
 	if pr, ok := result.(*models.PaginateResult); ok {
-		for _, item := range pr.Items {
-			base.handleModelAfterQuery(request, item, false)
+		items, ok := pr.Items.([]interface{})
+		if ok {
+			for _, item := range items {
+				base.handleModelAfterQuery(request, item, false)
+			}
 		}
 	} else {
 		base.handleModelAfterQuery(request, result, false)
