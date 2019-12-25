@@ -9,6 +9,9 @@ func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
 }
 
 func (base *BaseDbHandler) AfterUpdate(request models.IRequest) (err error) {
+	if base.SecondaryDB != nil {
+		err = base.SecondaryDB.Update(request)
+	}
 	return
 }
 

@@ -9,6 +9,9 @@ func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) (err error) {
 }
 
 func (base *BaseDbHandler) AfterUpsert(request models.IRequest) (err error) {
+	if base.SecondaryDB != nil {
+		err = base.SecondaryDB.Upsert(request)
+	}
 	return
 }
 

@@ -13,5 +13,8 @@ func (base *BaseDbHandler) Insert(request models.IRequest) (*models.IBaseModel, 
 }
 
 func (base *BaseDbHandler) AfterInsert(request models.IRequest) (err error) {
+	if base.SecondaryDB != nil {
+		_, err = base.SecondaryDB.Insert(request)
+	}
 	return
 }

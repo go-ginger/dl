@@ -36,8 +36,9 @@ type IBaseDbHandler interface {
 type BaseDbHandler struct {
 	IBaseDbHandler
 
-	Model     reflect.Value
-	ModelType reflect.Type
+	Model       reflect.Value
+	ModelType   reflect.Type
+	SecondaryDB IBaseDbHandler
 }
 
 func (base *BaseDbHandler) Initialize(model interface{}) {

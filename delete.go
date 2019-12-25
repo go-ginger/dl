@@ -14,6 +14,9 @@ func (base *BaseDbHandler) AfterDelete(request models.IRequest) (err error) {
 	return
 }
 
-func (base *BaseDbHandler) Delete(request models.IRequest) error {
+func (base *BaseDbHandler) Delete(request models.IRequest) (err error) {
+	if base.SecondaryDB != nil {
+		err = base.SecondaryDB.Delete(request)
+	}
 	return nil
 }
