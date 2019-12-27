@@ -7,7 +7,7 @@ import (
 )
 
 type IBaseDbHandler interface {
-	Initialize(model interface{})
+	Initialize(handler IBaseDbHandler, model interface{})
 	GetModelsInstance() interface{}
 	GetModelInstance() interface{}
 
@@ -31,6 +31,11 @@ type IBaseDbHandler interface {
 	BeforeDelete(request models.IRequest) (err error)
 	Delete(request models.IRequest) error
 	AfterDelete(request models.IRequest) (err error)
+
+	InsertInBackgroundEnabled() bool
+	UpdateInBackgroundEnabled() bool
+	DeleteInBackgroundEnabled() bool
+	IsFullObjOnUpdateRequired() bool
 }
 
 type BaseDbHandler struct {
@@ -39,11 +44,19 @@ type BaseDbHandler struct {
 	Model       reflect.Value
 	ModelType   reflect.Type
 	SecondaryDB IBaseDbHandler
+
+	InsertInBackground           bool
+	UpdateInBackground           bool
+	DeleteInBackground           bool
+	IsFullObjectOnUpdateRequired bool
 }
 
-func (base *BaseDbHandler) Initialize(model interface{}) {
-	base.Model = reflect.ValueOf(model)
-	base.ModelType = base.Model.Type()
+func (base *BaseDbHandler) Initialize(handler IBaseDbHandler, model interface{}) {
+	if model != nil {
+		base.Model = reflect.ValueOf(model)
+		base.ModelType = base.Model.Type()
+	}
+	base.IBaseDbHandler = handler
 }
 
 func (base *BaseDbHandler) GetModelInstance() interface{} {
@@ -58,4 +71,20 @@ func (base *BaseDbHandler) handleFilters(request models.IRequest) {
 	request.AddNewFilter("deleted", map[string]bool{
 		"$ne": true,
 	})
+}
+
+func (base *BaseDbHandler) InsertInBackgroundEnabled() bool {
+	return base.InsertInBackground
+}
+
+func (base *BaseDbHandler) UpdateInBackgroundEnabled() bool {
+	return base.UpdateInBackground
+}
+
+func (base *BaseDbHandler) DeleteInBackgroundEnabled() bool {
+	return base.DeleteInBackground
+}
+
+func (base *BaseDbHandler) IsFullObjOnUpdateRequired() bool {
+	return base.IsFullObjectOnUpdateRequired
 }

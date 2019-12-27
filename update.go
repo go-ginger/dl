@@ -1,6 +1,10 @@
 package dl
 
-import "github.com/go-ginger/models"
+import (
+	"fmt"
+	"github.com/go-ginger/models"
+	"log"
+)
 
 func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
 	req := request.GetBaseRequest()
@@ -8,9 +12,37 @@ func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
 	return
 }
 
+func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest) (err error) {
+	if base.SecondaryDB.IsFullObjOnUpdateRequired() {
+		objID := request.GetID()
+		req := request.GetBaseRequest()
+		req.Filters = &models.Filters{
+			"id": objID,
+		}
+		item, e := base.IBaseDbHandler.Get(request)
+		if e != nil {
+			err = e
+			return
+		}
+		request.SetBody(item)
+	}
+	err = base.SecondaryDB.Update(request)
+	return
+}
+
 func (base *BaseDbHandler) AfterUpdate(request models.IRequest) (err error) {
 	if base.SecondaryDB != nil {
-		err = base.SecondaryDB.Update(request)
+		if base.SecondaryDB.UpdateInBackgroundEnabled() {
+			go func() {
+				err = base.handleSecondaryUpdate(request)
+				if err != nil {
+					log.Println(fmt.Sprintf("error on handleSecondaryUpdate, err: %v", err))
+					return
+				}
+			}()
+		} else {
+			err = base.handleSecondaryUpdate(request)
+		}
 	}
 	return
 }
