@@ -82,6 +82,10 @@ func (base *BaseDbHandler) GetModelsInstance() interface{} {
 	return h.NewSliceInstanceOfType(base.ModelType)
 }
 
+func (base *BaseDbHandler) GetModelsInstancePtr() interface{} {
+	return h.NewSliceInstanceOfTypePtr(base.ModelType)
+}
+
 func (base *BaseDbHandler) handleFilters(request models.IRequest) {
 	request.AddNewFilter("deleted", map[string]bool{
 		"$ne": true,
