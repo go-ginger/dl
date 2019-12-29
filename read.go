@@ -7,16 +7,6 @@ import (
 )
 
 func (base *BaseDbHandler) BeforeQuery(request models.IRequest) (err error) {
-	req := request.GetBaseRequest()
-	if req.Sort == nil || len(*req.Sort) == 0 {
-		// default sort with id desc
-		req.Sort = &[]models.SortItem{
-			{
-				Name:      "id",
-				Ascending: false,
-			},
-		}
-	}
 	return
 }
 
@@ -40,18 +30,6 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 			for i := 0; i < s.NumField(); i++ {
 				f := s.Field(i)
 				fType := typeOfT.Field(i)
-				switch f.Type().Kind() {
-				case reflect.Ptr:
-					if f.IsNil() {
-						continue
-					}
-					i := f.Elem()
-					base.handleModelAfterQuery(request, i, true, remainingDepth-1)
-					continue
-				case reflect.Struct:
-					base.handleModelAfterQuery(request, f, true, remainingDepth-1)
-					continue
-				}
 				tag, ok := fType.Tag.Lookup("load")
 				if ok {
 					tagParts := strings.Split(tag, ",")
@@ -66,6 +44,18 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 							}
 						}
 					}
+				}
+				switch f.Type().Kind() {
+				case reflect.Ptr:
+					if f.IsNil() {
+						continue
+					}
+					i := f.Elem()
+					base.handleModelAfterQuery(request, i, true, remainingDepth-1)
+					continue
+				case reflect.Struct:
+					base.handleModelAfterQuery(request, f, true, remainingDepth-1)
+					continue
 				}
 			}
 			break
