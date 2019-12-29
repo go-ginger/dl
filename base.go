@@ -1,6 +1,7 @@
 package dl
 
 import (
+	"github.com/go-ginger/dl/query"
 	h "github.com/go-ginger/helpers"
 	"github.com/go-ginger/models"
 	"reflect"
@@ -10,9 +11,10 @@ type IBaseDbHandler interface {
 	Initialize(handler IBaseDbHandler, model interface{})
 	GetModelsInstance() interface{}
 	GetModelInstance() interface{}
+	GetBaseDbHandler() IBaseDbHandler
 
 	BeforeInsert(request models.IRequest) (err error)
-	Insert(request models.IRequest) (interface{}, error)
+	Insert(request models.IRequest) (result interface{}, err error)
 	AfterInsert(request models.IRequest) (err error)
 
 	BeforeQuery(request models.IRequest) (err error)
@@ -41,6 +43,8 @@ type IBaseDbHandler interface {
 type BaseDbHandler struct {
 	IBaseDbHandler
 
+	QueryParser query.IParser
+
 	Model       reflect.Value
 	ModelType   reflect.Type
 	SecondaryDB IBaseDbHandler
@@ -57,6 +61,10 @@ func (base *BaseDbHandler) Initialize(handler IBaseDbHandler, model interface{})
 		base.ModelType = base.Model.Type()
 	}
 	base.IBaseDbHandler = handler
+}
+
+func (base *BaseDbHandler) GetBaseDbHandler() IBaseDbHandler {
+	return base
 }
 
 func (base *BaseDbHandler) GetModelInstance() interface{} {
