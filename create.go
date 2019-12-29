@@ -12,6 +12,22 @@ func (base *BaseDbHandler) BeforeInsert(request models.IRequest) (err error) {
 	return
 }
 
+func (base *BaseDbHandler) DoInsert(request models.IRequest) (result interface{}, err error) {
+	err = base.IBaseDbHandler.BeforeInsert(request)
+	if err != nil {
+		return
+	}
+	result, err = base.IBaseDbHandler.Insert(request)
+	if err != nil {
+		return
+	}
+	err = base.IBaseDbHandler.AfterInsert(request)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (base *BaseDbHandler) Insert(request models.IRequest) (result interface{}, err error) {
 	return
 }

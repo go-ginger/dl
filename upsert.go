@@ -15,6 +15,22 @@ func (base *BaseDbHandler) AfterUpsert(request models.IRequest) (err error) {
 	return
 }
 
+func (base *BaseDbHandler) DoUpsert(request models.IRequest) (err error) {
+	err = base.IBaseDbHandler.BeforeUpsert(request)
+	if err != nil {
+		return
+	}
+	err = base.IBaseDbHandler.Upsert(request)
+	if err != nil {
+		return
+	}
+	err = base.IBaseDbHandler.AfterUpsert(request)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (base *BaseDbHandler) Upsert(request models.IRequest) error {
 	return nil
 }

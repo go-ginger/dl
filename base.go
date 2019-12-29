@@ -13,6 +13,13 @@ type IBaseDbHandler interface {
 	GetModelInstance() interface{}
 	GetBaseDbHandler() IBaseDbHandler
 
+	DoInsert(request models.IRequest) (result interface{}, err error)
+	DoPaginate(request models.IRequest) (*models.PaginateResult, error)
+	DoGet(request models.IRequest) (models.IBaseModel, error)
+	DoUpdate(request models.IRequest) error
+	DoUpsert(request models.IRequest) error
+	DoDelete(request models.IRequest) error
+
 	BeforeInsert(request models.IRequest) (err error)
 	Insert(request models.IRequest) (result interface{}, err error)
 	AfterInsert(request models.IRequest) (err error)

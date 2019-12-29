@@ -47,6 +47,22 @@ func (base *BaseDbHandler) AfterUpdate(request models.IRequest) (err error) {
 	return
 }
 
+func (base *BaseDbHandler) DoUpdate(request models.IRequest) (err error) {
+	err = base.IBaseDbHandler.BeforeUpdate(request)
+	if err != nil {
+		return
+	}
+	err = base.IBaseDbHandler.Update(request)
+	if err != nil {
+		return
+	}
+	err = base.IBaseDbHandler.AfterUpdate(request)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (base *BaseDbHandler) Update(request models.IRequest) error {
 	return nil
 }
