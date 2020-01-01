@@ -32,15 +32,18 @@ func (base *BaseDbHandler) handleReadOnlyFields(request models.IRequest) {
 			}
 			tag, ok = ff.Tag.Lookup("edit_roles")
 			if ok {
-				canRead := false
+				canEdit := false
 				auth := request.GetAuth()
 				if auth != nil {
 					tagParts := strings.Split(tag, ",")
-					if auth.HasRole(tagParts...) {
-						canRead = true
+					for _, role := range tagParts {
+						if auth.HasRole(role) || (role == "id" && auth.GetCurrentAccountId() == req.ID) {
+							canEdit = true
+							break
+						}
 					}
 				}
-				if !canRead {
+				if !canEdit {
 					if f.IsValid() {
 						if f.CanSet() {
 							f.Set(reflect.Zero(ff.Type))

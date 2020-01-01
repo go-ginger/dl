@@ -35,14 +35,12 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					tagParts := strings.Split(tag, ",")
 					eventName, targetFieldName := tagParts[0], tagParts[1]
 					val := f.Interface()
-					if val != nil && val != 0 && val != "" && val == false {
-						result, handled := TryEvent(eventName, ff.Name, val)
-						if handled {
-							targetField := s.FieldByName(targetFieldName)
-							if targetField.IsValid() {
-								if f.CanSet() {
-									targetField.Set(reflect.ValueOf(result))
-								}
+					result, handled := TryEvent(eventName, ff.Name, val)
+					if handled {
+						targetField := s.FieldByName(targetFieldName)
+						if targetField.IsValid() {
+							if f.CanSet() {
+								targetField.Set(reflect.ValueOf(result))
 							}
 						}
 					}
@@ -65,8 +63,11 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					auth := request.GetAuth()
 					if auth != nil {
 						tagParts := strings.Split(tag, ",")
-						if auth.HasRole(tagParts...) {
-							canRead = true
+						for _, role := range tagParts {
+							if auth.HasRole(role) || (role == "id" && auth.GetCurrentAccountId() == req.ID) {
+								canRead = true
+								break
+							}
 						}
 					}
 					if !canRead {
