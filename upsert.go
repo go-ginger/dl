@@ -1,8 +1,60 @@
 package dl
 
-import "github.com/go-ginger/models"
+import (
+	"github.com/go-ginger/models"
+	"reflect"
+	"strings"
+)
+
+func (base *BaseDbHandler) handleReadOnlyFields(request models.IRequest) {
+	req := request.GetBaseRequest()
+	s := reflect.ValueOf(req.Body).Elem()
+	typeOfT := s.Type()
+	switch s.Kind() {
+	case reflect.Struct:
+		for i := 0; i < s.NumField(); i++ {
+			f := s.Field(i)
+			ff := typeOfT.Field(i)
+			tag, ok := ff.Tag.Lookup("dl")
+			if ok {
+				tagParts := strings.Split(tag, ",")
+				for _, tagPart := range tagParts {
+					switch tagPart {
+					case "read_only":
+						if f.IsValid() {
+							if f.CanSet() {
+								f.Set(reflect.Zero(ff.Type))
+							}
+						}
+						break
+					}
+				}
+			}
+			tag, ok = ff.Tag.Lookup("edit_roles")
+			if ok {
+				canRead := false
+				auth := request.GetAuth()
+				if auth != nil {
+					tagParts := strings.Split(tag, ",")
+					if auth.HasRole(tagParts...) {
+						canRead = true
+					}
+				}
+				if !canRead {
+					if f.IsValid() {
+						if f.CanSet() {
+							f.Set(reflect.Zero(ff.Type))
+						}
+					}
+				}
+			}
+		}
+		break
+	}
+}
 
 func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) (err error) {
+	base.handleReadOnlyFields(request)
 	req := request.GetBaseRequest()
 	req.Body.HandleUpsertDefaultValues()
 	return

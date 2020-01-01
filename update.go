@@ -7,6 +7,7 @@ import (
 )
 
 func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
+	base.handleReadOnlyFields(request)
 	req := request.GetBaseRequest()
 	req.Body.HandleUpdateDefaultValues()
 	return

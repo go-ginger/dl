@@ -29,21 +29,20 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 		case reflect.Struct:
 			for i := 0; i < s.NumField(); i++ {
 				f := s.Field(i)
-				fType := typeOfT.Field(i)
-				tag, ok := fType.Tag.Lookup("load")
+				ff := typeOfT.Field(i)
+				tag, ok := ff.Tag.Lookup("load")
 				if ok {
 					tagParts := strings.Split(tag, ",")
 					eventName, targetFieldName := tagParts[0], tagParts[1]
 					val := f.Interface()
-					if val == nil || val == 0 || val == "" || val == false {
-						continue
-					}
-					result, handled := TryEvent(eventName, fType.Name, val)
-					if handled {
-						targetField := s.FieldByName(targetFieldName)
-						if targetField.IsValid() {
-							if f.CanSet() {
-								targetField.Set(reflect.ValueOf(result))
+					if val != nil && val != 0 && val != "" && val == false {
+						result, handled := TryEvent(eventName, ff.Name, val)
+						if handled {
+							targetField := s.FieldByName(targetFieldName)
+							if targetField.IsValid() {
+								if f.CanSet() {
+									targetField.Set(reflect.ValueOf(result))
+								}
 							}
 						}
 					}
@@ -51,14 +50,32 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 				switch f.Type().Kind() {
 				case reflect.Ptr:
 					if f.IsNil() {
-						continue
+						break
 					}
 					i := f.Elem()
 					base.handleModelAfterQuery(request, i, true, remainingDepth-1)
-					continue
+					break
 				case reflect.Struct:
 					base.handleModelAfterQuery(request, f, true, remainingDepth-1)
-					continue
+					break
+				}
+				tag, ok = ff.Tag.Lookup("read_roles")
+				if ok {
+					canRead := false
+					auth := request.GetAuth()
+					if auth != nil {
+						tagParts := strings.Split(tag, ",")
+						if auth.HasRole(tagParts...) {
+							canRead = true
+						}
+					}
+					if !canRead {
+						if f.IsValid() {
+							if f.CanSet() {
+								f.Set(reflect.Zero(ff.Type))
+							}
+						}
+					}
 				}
 			}
 			break
