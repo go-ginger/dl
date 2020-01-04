@@ -8,6 +8,9 @@ import (
 
 func (base *BaseDbHandler) handleReadOnlyFields(request models.IRequest) {
 	req := request.GetBaseRequest()
+	if req.Body == nil {
+		return
+	}
 	s := reflect.ValueOf(req.Body).Elem()
 	typeOfT := s.Type()
 	switch s.Kind() {

@@ -56,6 +56,7 @@ type BaseDbHandler struct {
 	ModelType   reflect.Type
 	SecondaryDB IBaseDbHandler
 
+	SetFlagOnDelete              *bool
 	InsertInBackground           bool
 	UpdateInBackground           bool
 	DeleteInBackground           bool
@@ -66,6 +67,10 @@ func (base *BaseDbHandler) Initialize(handler IBaseDbHandler, model interface{})
 	if model != nil {
 		base.Model = reflect.ValueOf(model)
 		base.ModelType = base.Model.Type()
+	}
+	if base.SetFlagOnDelete == nil {
+		setFlag := true
+		base.SetFlagOnDelete = &setFlag
 	}
 	base.IBaseDbHandler = handler
 }
