@@ -35,8 +35,8 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					tagParts := strings.Split(tag, ",")
 					eventName, targetFieldName := tagParts[0], tagParts[1]
 					val := f.Interface()
-					result, handled := TryEvent(eventName, ff.Name, val)
-					if handled {
+					result, handled := TryEvent(request, eventName, ff.Name, val)
+					if handled && result != nil {
 						targetField := s.FieldByName(targetFieldName)
 						if targetField.IsValid() {
 							if f.CanSet() {

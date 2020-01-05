@@ -1,22 +1,25 @@
 package dl
 
-import "reflect"
+import (
+	"github.com/go-ginger/models"
+	"reflect"
+)
 
 type Event struct {
 	Name     string
-	Callback func(fieldName string, value interface{}) (interface{}, error)
+	Callback func(request models.IRequest, fieldName string, value interface{}) (interface{}, error)
 }
 
 var events = map[string]*Event{}
 
-func AddNewEvent(eventName string, callback func(fieldName string, value interface{}) (interface{}, error)) {
+func AddNewEvent(eventName string, callback func(request models.IRequest, fieldName string, value interface{}) (interface{}, error)) {
 	events[eventName] = &Event{
 		Name:     eventName,
 		Callback: callback,
 	}
 }
 
-func TryEvent(eventName, fieldName string, value interface{}) (result interface{}, ok bool) {
+func TryEvent(request models.IRequest, eventName, fieldName string, value interface{}) (result interface{}, ok bool) {
 	if event, exists := events[eventName]; exists {
 		v := reflect.ValueOf(value)
 		result = nil
@@ -33,7 +36,7 @@ func TryEvent(eventName, fieldName string, value interface{}) (result interface{
 			}
 		}
 		ok = true
-		eventResult, err := event.Callback(fieldName, value)
+		eventResult, err := event.Callback(request, fieldName, value)
 		if err != nil {
 			return nil, false
 		}
