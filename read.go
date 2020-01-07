@@ -45,6 +45,24 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 						}
 					}
 				}
+				tag, ok = ff.Tag.Lookup("load_from")
+				if ok {
+					tagParts := strings.Split(tag, ",")
+					sourceFieldName, eventName, targetFieldName := tagParts[0], tagParts[1], tagParts[2]
+					sourceField := s.FieldByName(sourceFieldName)
+					if !sourceField.IsNil() {
+						val := sourceField.Interface()
+						result, handled := TryEvent(request, eventName, ff.Name, val)
+						if handled && result != nil {
+							targetField := s.FieldByName(targetFieldName)
+							if targetField.IsValid() {
+								if f.CanSet() {
+									targetField.Set(reflect.ValueOf(result))
+								}
+							}
+						}
+					}
+				}
 				switch f.Type().Kind() {
 				case reflect.Ptr:
 					if f.IsNil() {
