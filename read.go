@@ -29,6 +29,9 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 		case reflect.Struct:
 			for i := 0; i < s.NumField(); i++ {
 				f := s.Field(i)
+				if !f.IsValid() {
+					continue
+				}
 				ff := typeOfT.Field(i)
 				tag, ok := ff.Tag.Lookup("load")
 				if ok {
@@ -38,27 +41,22 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					result, handled := TryEvent(request, eventName, ff.Name, val)
 					if handled && result != nil {
 						targetField := s.FieldByName(targetFieldName)
-						if targetField.IsValid() {
-							if f.CanSet() {
-								targetField.Set(reflect.ValueOf(result))
-							}
+						if f.CanSet() {
+							targetField.Set(reflect.ValueOf(result))
 						}
 					}
 				}
 				tag, ok = ff.Tag.Lookup("load_from")
 				if ok {
 					tagParts := strings.Split(tag, ",")
-					sourceFieldName, eventName, targetFieldName := tagParts[0], tagParts[1], tagParts[2]
+					sourceFieldName, eventName := tagParts[0], tagParts[1]
 					sourceField := s.FieldByName(sourceFieldName)
 					if !sourceField.IsNil() {
 						val := sourceField.Interface()
 						result, handled := TryEvent(request, eventName, ff.Name, val)
 						if handled && result != nil {
-							targetField := s.FieldByName(targetFieldName)
-							if targetField.IsValid() {
-								if f.CanSet() {
-									targetField.Set(reflect.ValueOf(result))
-								}
+							if f.CanSet() {
+								f.Set(reflect.ValueOf(result))
 							}
 						}
 					}
