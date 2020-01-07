@@ -51,13 +51,11 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					tagParts := strings.Split(tag, ",")
 					sourceFieldName, eventName := tagParts[0], tagParts[1]
 					sourceField := s.FieldByName(sourceFieldName)
-					if !sourceField.IsNil() {
-						val := sourceField.Interface()
-						result, handled := TryEvent(request, eventName, ff.Name, val)
-						if handled && result != nil {
-							if f.CanSet() {
-								f.Set(reflect.ValueOf(result))
-							}
+					val := sourceField.Interface()
+					result, handled := TryEvent(request, eventName, ff.Name, val)
+					if handled && result != nil {
+						if f.CanSet() {
+							f.Set(reflect.ValueOf(result))
 						}
 					}
 				}
