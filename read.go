@@ -93,6 +93,10 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					}
 				}
 			}
+			mv := s.Addr().Interface()
+			if baseModel, ok := mv.(models.IBaseModel); ok {
+				baseModel.Populate(request)
+			}
 			break
 		}
 	}
