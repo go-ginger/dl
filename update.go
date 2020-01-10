@@ -15,8 +15,8 @@ func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
 	return
 }
 
-func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest) (err error) {
-	if base.SecondaryDB.IsFullObjOnUpdateRequired() {
+func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {
+	if secondaryDB.IsFullObjOnUpdateRequired() {
 		objID := request.GetID()
 		req := request.GetBaseRequest()
 		req.Filters = &models.Filters{
@@ -29,22 +29,24 @@ func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest) (err e
 		}
 		request.SetBody(item)
 	}
-	err = base.SecondaryDB.Update(request)
+	err = secondaryDB.Update(request)
 	return
 }
 
 func (base *BaseDbHandler) AfterUpdate(request models.IRequest) (err error) {
-	if base.SecondaryDB != nil {
-		if base.SecondaryDB.UpdateInBackgroundEnabled() {
-			go func() {
-				err = base.handleSecondaryUpdate(request)
-				if err != nil {
-					log.Println(fmt.Sprintf("error on handleSecondaryUpdate, err: %v", err))
-					return
-				}
-			}()
-		} else {
-			err = base.handleSecondaryUpdate(request)
+	if base.SecondaryDBs != nil {
+		for _, secondaryDB := range base.SecondaryDBs {
+			if secondaryDB.UpdateInBackgroundEnabled() {
+				go func() {
+					err = base.handleSecondaryUpdate(request, secondaryDB)
+					if err != nil {
+						log.Println(fmt.Sprintf("error on handleSecondaryUpdate, err: %v", err))
+						return
+					}
+				}()
+			} else {
+				err = base.handleSecondaryUpdate(request, secondaryDB)
+			}
 		}
 	}
 	return

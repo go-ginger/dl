@@ -1,6 +1,7 @@
 package dl
 
 import (
+	"github.com/go-ginger/helpers"
 	"github.com/go-ginger/models"
 	"reflect"
 	"strings"
@@ -21,7 +22,7 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 	} else {
 		s = model.(reflect.Value)
 	}
-	typeOfT := s.Type()
+	sType := s.Type()
 
 	req := request.GetBaseRequest()
 	if doLoad, ok := req.Tags["load"]; !ok || doLoad {
@@ -29,10 +30,10 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 		case reflect.Struct:
 			for i := 0; i < s.NumField(); i++ {
 				f := s.Field(i)
-				if !f.IsValid() {
+				if helpers.IsEmptyValue(f) {
 					continue
 				}
-				ff := typeOfT.Field(i)
+				ff := sType.Field(i)
 				tag, ok := ff.Tag.Lookup("load")
 				if ok {
 					tagParts := strings.Split(tag, ",")

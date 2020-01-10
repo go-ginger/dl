@@ -1,7 +1,9 @@
 package dl
 
 import (
+	"fmt"
 	"github.com/go-ginger/models"
+	"log"
 	"reflect"
 	"strings"
 )
@@ -67,8 +69,22 @@ func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) (err error) {
 }
 
 func (base *BaseDbHandler) AfterUpsert(request models.IRequest) (err error) {
-	if base.SecondaryDB != nil {
-		err = base.SecondaryDB.Upsert(request)
+	if base.SecondaryDBs != nil {
+		for _, secondaryDB := range base.SecondaryDBs {
+			if base.InsertInBackgroundEnabled() && base.UpdateInBackgroundEnabled() {
+				go func() {
+					err := secondaryDB.Upsert(request)
+					if err != nil {
+						log.Println(fmt.Sprintf("error upsert secondary db %v, err: %v", secondaryDB, err))
+					}
+				}()
+			} else {
+				e := secondaryDB.Upsert(request)
+				if e != nil {
+					err = e
+				}
+			}
+		}
 	}
 	return
 }

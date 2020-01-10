@@ -52,9 +52,9 @@ type BaseDbHandler struct {
 
 	QueryParser query.IParser
 
-	Model       reflect.Value
-	ModelType   reflect.Type
-	SecondaryDB IBaseDbHandler
+	Model        reflect.Value
+	ModelType    reflect.Type
+	SecondaryDBs []IBaseDbHandler
 
 	SetFlagOnDelete              *bool
 	InsertInBackground           bool
