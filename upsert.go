@@ -13,6 +13,9 @@ func (base *BaseDbHandler) handleReadOnlyFields(request models.IRequest) {
 	if req.Body == nil {
 		return
 	}
+	if checkReadOnly, ok := req.Tags["check_edit_roles"]; ok && !checkReadOnly {
+		return
+	}
 	s := reflect.ValueOf(req.Body).Elem()
 	typeOfT := s.Type()
 	switch s.Kind() {
