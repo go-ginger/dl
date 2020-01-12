@@ -13,6 +13,9 @@ func (base *BaseDbHandler) handleReadOnlyFields(request models.IRequest) {
 	if req.Body == nil {
 		return
 	}
+	if isSystem, ok := req.Tags["system"]; ok && isSystem {
+		return
+	}
 	if checkReadOnly, ok := req.Tags["check_edit_roles"]; ok && !checkReadOnly {
 		return
 	}
@@ -101,6 +104,7 @@ func (base *BaseDbHandler) DoUpsert(request models.IRequest) (err error) {
 	if err != nil {
 		return
 	}
+	request.AddTag("system", true)
 	err = base.IBaseDbHandler.AfterUpsert(request)
 	if err != nil {
 		return

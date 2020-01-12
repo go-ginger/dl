@@ -61,7 +61,9 @@ func (base *BaseDbHandler) DoUpdate(request models.IRequest) (err error) {
 	if err != nil {
 		return
 	}
-	err = base.IBaseDbHandler.AfterUpdate(request)
+	req := request.GetBaseRequest()
+	req.AddTag("system", true)
+	err = base.IBaseDbHandler.AfterUpdate(req)
 	if err != nil {
 		return
 	}

@@ -42,6 +42,7 @@ func (base *BaseDbHandler) DoDelete(request models.IRequest) (err error) {
 	if err != nil {
 		return
 	}
+	request.AddTag("system", true)
 	err = base.IBaseDbHandler.AfterDelete(request)
 	if err != nil {
 		return

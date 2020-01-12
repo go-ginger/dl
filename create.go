@@ -22,6 +22,7 @@ func (base *BaseDbHandler) DoInsert(request models.IRequest) (result interface{}
 	if err != nil {
 		return
 	}
+	request.AddTag("system", true)
 	err = base.IBaseDbHandler.AfterInsert(request)
 	if err != nil {
 		return
