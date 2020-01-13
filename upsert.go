@@ -104,7 +104,7 @@ func (base *BaseDbHandler) DoUpsert(request models.IRequest) (err error) {
 	if err != nil {
 		return
 	}
-	request.AddTag("system", true)
+	request.SetTag("system", true)
 	err = base.IBaseDbHandler.AfterUpsert(request)
 	if err != nil {
 		return
