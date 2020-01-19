@@ -81,7 +81,7 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 						if auth != nil {
 							tagParts := strings.Split(tag, ",")
 							for _, role := range tagParts {
-								if auth.HasRole(role) || (role == "id" && auth.GetCurrentAccountId() == req.ID) {
+								if auth.HasRole(role) || (role == "id" && auth.GetCurrentAccountId(request) == req.ID) {
 									canRead = true
 									break
 								}
