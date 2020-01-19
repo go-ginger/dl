@@ -30,24 +30,8 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 		case reflect.Struct:
 			for i := 0; i < s.NumField(); i++ {
 				f := s.Field(i)
-				if helpers.IsEmptyValue(f) {
-					continue
-				}
 				ff := sType.Field(i)
-				tag, ok := ff.Tag.Lookup("load")
-				if ok {
-					tagParts := strings.Split(tag, ",")
-					eventName, targetFieldName := tagParts[0], tagParts[1]
-					val := f.Interface()
-					result, handled := TryEvent(request, eventName, ff.Name, val)
-					if handled && result != nil {
-						targetField := s.FieldByName(targetFieldName)
-						if f.CanSet() {
-							targetField.Set(reflect.ValueOf(result))
-						}
-					}
-				}
-				tag, ok = ff.Tag.Lookup("load_from")
+				tag, ok := ff.Tag.Lookup("load_from")
 				if ok {
 					tagParts := strings.Split(tag, ",")
 					sourceFieldName, eventName := tagParts[0], tagParts[1]
@@ -57,6 +41,22 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					if handled && result != nil {
 						if f.CanSet() {
 							f.Set(reflect.ValueOf(result))
+						}
+					}
+				}
+				if helpers.IsEmptyValue(f) {
+					continue
+				}
+				tag, ok = ff.Tag.Lookup("load")
+				if ok {
+					tagParts := strings.Split(tag, ",")
+					eventName, targetFieldName := tagParts[0], tagParts[1]
+					val := f.Interface()
+					result, handled := TryEvent(request, eventName, ff.Name, val)
+					if handled && result != nil {
+						targetField := s.FieldByName(targetFieldName)
+						if f.CanSet() {
+							targetField.Set(reflect.ValueOf(result))
 						}
 					}
 				}
