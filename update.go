@@ -22,7 +22,7 @@ func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest, second
 		req.Filters = &models.Filters{
 			"id": objID,
 		}
-		item, e := base.IBaseDbHandler.Get(request)
+		item, e := base.IBaseDbHandler.DoGet(request)
 		if e != nil {
 			err = e
 			return
