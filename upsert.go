@@ -74,18 +74,32 @@ func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) (err error) {
 	return
 }
 
+func (base *BaseDbHandler) handleSecondaryUpsert(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {
+	if secondaryDB.IsFullObjOnUpdateRequired() {
+		item, e := base.IBaseDbHandler.DoGet(request)
+		if e != nil {
+			err = e
+			return
+		}
+		request.SetID(item.GetID())
+		request.SetBody(item)
+	}
+	err = secondaryDB.DoUpsert(request)
+	return
+}
+
 func (base *BaseDbHandler) AfterUpsert(request models.IRequest) (err error) {
 	if base.SecondaryDBs != nil {
 		for _, secondaryDB := range base.SecondaryDBs {
 			if base.InsertInBackgroundEnabled() && base.UpdateInBackgroundEnabled() {
 				go func(db IBaseDbHandler) {
-					err := db.DoUpsert(request)
+					err := base.handleSecondaryUpsert(request, db)
 					if err != nil {
 						log.Println(fmt.Sprintf("error upsert secondary db %v, err: %v", secondaryDB, err))
 					}
 				}(secondaryDB)
 			} else {
-				e := secondaryDB.DoUpsert(request)
+				e := base.handleSecondaryUpsert(request, secondaryDB)
 				if e != nil {
 					err = e
 				}
