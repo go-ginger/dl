@@ -29,7 +29,7 @@ func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest, second
 		}
 		request.SetBody(item)
 	}
-	err = secondaryDB.Update(request)
+	err = secondaryDB.DoUpdate(request)
 	return
 }
 
@@ -37,13 +37,13 @@ func (base *BaseDbHandler) AfterUpdate(request models.IRequest) (err error) {
 	if base.SecondaryDBs != nil {
 		for _, secondaryDB := range base.SecondaryDBs {
 			if secondaryDB.UpdateInBackgroundEnabled() {
-				go func() {
-					err = base.handleSecondaryUpdate(request, secondaryDB)
+				go func(db IBaseDbHandler) {
+					err = base.handleSecondaryUpdate(request, db)
 					if err != nil {
 						log.Println(fmt.Sprintf("error on handleSecondaryUpdate, err: %v", err))
 						return
 					}
-				}()
+				}(secondaryDB)
 			} else {
 				err = base.handleSecondaryUpdate(request, secondaryDB)
 			}

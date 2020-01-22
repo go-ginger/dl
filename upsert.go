@@ -78,14 +78,14 @@ func (base *BaseDbHandler) AfterUpsert(request models.IRequest) (err error) {
 	if base.SecondaryDBs != nil {
 		for _, secondaryDB := range base.SecondaryDBs {
 			if base.InsertInBackgroundEnabled() && base.UpdateInBackgroundEnabled() {
-				go func() {
-					err := secondaryDB.Upsert(request)
+				go func(db IBaseDbHandler) {
+					err := db.DoUpsert(request)
 					if err != nil {
 						log.Println(fmt.Sprintf("error upsert secondary db %v, err: %v", secondaryDB, err))
 					}
-				}()
+				}(secondaryDB)
 			} else {
-				e := secondaryDB.Upsert(request)
+				e := secondaryDB.DoUpsert(request)
 				if e != nil {
 					err = e
 				}

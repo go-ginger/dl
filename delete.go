@@ -18,15 +18,15 @@ func (base *BaseDbHandler) AfterDelete(request models.IRequest) (err error) {
 	if base.SecondaryDBs != nil {
 		for _, secondaryDB := range base.SecondaryDBs {
 			if secondaryDB.DeleteInBackgroundEnabled() {
-				go func() {
-					err := secondaryDB.Delete(request)
+				go func(db IBaseDbHandler) {
+					err := db.DoDelete(request)
 					if err != nil {
 						log.Println(fmt.Sprintf("error on delete secondary dbHandler, err: %v", err))
 						return
 					}
-				}()
+				}(secondaryDB)
 			} else {
-				err = secondaryDB.Delete(request)
+				err = secondaryDB.DoDelete(request)
 			}
 		}
 	}

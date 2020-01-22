@@ -38,15 +38,15 @@ func (base *BaseDbHandler) AfterInsert(request models.IRequest) (err error) {
 	if base.SecondaryDBs != nil {
 		for _, secondaryDB := range base.SecondaryDBs {
 			if secondaryDB.InsertInBackgroundEnabled() {
-				go func() {
-					_, err := secondaryDB.Insert(request)
+				go func(db IBaseDbHandler) {
+					_, err := db.DoInsert(request)
 					if err != nil {
 						log.Println(fmt.Sprintf("Insert error on secondary dbHandler, err: %v", err))
 						return
 					}
-				}()
+				}(secondaryDB)
 			} else {
-				_, err = secondaryDB.Insert(request)
+				_, err = secondaryDB.DoInsert(request)
 			}
 		}
 	}
