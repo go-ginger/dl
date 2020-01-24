@@ -11,16 +11,10 @@ func (base *BaseDbHandler) BeforeQuery(request models.IRequest) (err error) {
 	return
 }
 
-func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model interface{},
-	isValue bool, remainingDepth int) {
-	if remainingDepth == 0 {
-		return
-	}
-	var s reflect.Value
-	if !isValue {
+func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model interface{}) {
+	s, ok := model.(reflect.Value)
+	if !ok {
 		s = reflect.ValueOf(model).Elem()
-	} else {
-		s = model.(reflect.Value)
 	}
 	sType := s.Type()
 
@@ -65,36 +59,16 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					if f.IsNil() {
 						break
 					}
-					i := f.Elem()
-					base.handleModelAfterQuery(request, i, true, remainingDepth-1)
+					base.handleModelAfterQuery(request, f.Elem())
 					break
 				case reflect.Struct:
-					base.handleModelAfterQuery(request, f, true, remainingDepth-1)
+					base.handleModelAfterQuery(request, f)
 					break
-				}
-
-				if isSystem, ok := req.Tags["system"]; !ok || !isSystem {
-					tag, ok = ff.Tag.Lookup("read_roles")
-					if ok {
-						canRead := false
-						auth := request.GetAuth()
-						if auth != nil {
-							tagParts := strings.Split(tag, ",")
-							for _, role := range tagParts {
-								if auth.HasRole(role) || (role == "id" && auth.GetCurrentAccountId(request) == req.ID) {
-									canRead = true
-									break
-								}
-							}
-						}
-						if !canRead {
-							if f.IsValid() {
-								if f.CanSet() {
-									f.Set(reflect.Zero(ff.Type))
-								}
-							}
-						}
+				case reflect.Slice:
+					for ind := 0; ind < f.Len(); ind++ {
+						base.handleModelAfterQuery(request, f.Index(ind))
 					}
+					break
 				}
 			}
 			mv := s.Addr().Interface()
@@ -112,11 +86,11 @@ func (base *BaseDbHandler) AfterQuery(request models.IRequest, result interface{
 		case reflect.Slice:
 			s := reflect.ValueOf(pr.Items)
 			for i := 0; i < s.Len(); i++ {
-				base.handleModelAfterQuery(request, s.Index(i), true, 3)
+				base.handleModelAfterQuery(request, s.Index(i))
 			}
 		}
 	} else {
-		base.handleModelAfterQuery(request, result, false, 3)
+		base.handleModelAfterQuery(request, result)
 	}
 	return
 }
