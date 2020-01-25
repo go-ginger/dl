@@ -97,9 +97,12 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					}
 				}
 			}
-			mv := s.Addr().Interface()
-			if baseModel, ok := mv.(models.IBaseModel); ok {
-				baseModel.Populate(request)
+			addr := s.Addr()
+			if addr.IsValid() && addr.CanInterface() {
+				mv := addr.Interface()
+				if baseModel, ok := mv.(models.IBaseModel); ok {
+					baseModel.Populate(request)
+				}
 			}
 			break
 		}
