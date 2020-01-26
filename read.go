@@ -72,30 +72,6 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 					base.handleModelAfterQuery(request, f, true, remainingDepth-1)
 					break
 				}
-
-				if isSystem, ok := req.Tags["system"]; !ok || !isSystem {
-					tag, ok = ff.Tag.Lookup("read_roles")
-					if ok {
-						canRead := false
-						auth := request.GetAuth()
-						if auth != nil {
-							tagParts := strings.Split(tag, ",")
-							for _, role := range tagParts {
-								if auth.HasRole(role) || (role == "id" && auth.GetCurrentAccountId(request) == req.ID) {
-									canRead = true
-									break
-								}
-							}
-						}
-						if !canRead {
-							if f.IsValid() {
-								if f.CanSet() {
-									f.Set(reflect.Zero(ff.Type))
-								}
-							}
-						}
-					}
-				}
 			}
 			addr := s.Addr()
 			if addr.IsValid() && addr.CanInterface() {
