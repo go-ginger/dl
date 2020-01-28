@@ -75,16 +75,20 @@ func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) (err error) {
 }
 
 func (base *BaseDbHandler) handleSecondaryUpsert(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {
+	secondaryRequest := request.Populate(&models.Request{
+		ID:   request.GetID(),
+		Body: request.GetBody(),
+	})
 	if secondaryDB.IsFullObjOnUpdateRequired() {
-		item, e := base.IBaseDbHandler.DoGet(request)
+		item, e := base.IBaseDbHandler.DoGet(secondaryRequest)
 		if e != nil {
 			err = e
 			return
 		}
-		request.SetID(item.GetID())
-		request.SetBody(item)
+		secondaryRequest.SetID(item.GetID())
+		secondaryRequest.SetBody(item)
 	}
-	err = secondaryDB.DoUpsert(request)
+	err = secondaryDB.DoUpsert(secondaryRequest)
 	return
 }
 

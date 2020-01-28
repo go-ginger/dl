@@ -16,20 +16,24 @@ func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
 }
 
 func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {
+	secondaryRequest := request.Populate(&models.Request{
+		ID:   request.GetID(),
+		Body: request.GetBody(),
+	})
 	if secondaryDB.IsFullObjOnUpdateRequired() {
 		objID := request.GetID()
-		req := request.GetBaseRequest()
+		req := secondaryRequest.GetBaseRequest()
 		req.Filters = &models.Filters{
 			"id": objID,
 		}
-		item, e := base.IBaseDbHandler.DoGet(request)
+		item, e := base.IBaseDbHandler.DoGet(secondaryRequest)
 		if e != nil {
 			err = e
 			return
 		}
-		request.SetBody(item)
+		secondaryRequest.SetBody(item)
 	}
-	err = secondaryDB.DoUpdate(request)
+	err = secondaryDB.DoUpdate(secondaryRequest)
 	return
 }
 
