@@ -2,6 +2,7 @@ package dl
 
 import (
 	"fmt"
+	"github.com/go-ginger/helpers"
 	"github.com/go-ginger/models"
 	"log"
 )
@@ -16,10 +17,7 @@ func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
 }
 
 func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {
-	secondaryRequest := request.Populate(&models.Request{
-		ID:   request.GetID(),
-		Body: request.GetBody(),
-	})
+	secondaryRequest := helpers.Clone(request).(models.IRequest)
 	if secondaryDB.IsFullObjOnUpdateRequired() {
 		objID := request.GetID()
 		req := secondaryRequest.GetBaseRequest()

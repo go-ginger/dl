@@ -2,6 +2,7 @@ package dl
 
 import (
 	"fmt"
+	"github.com/go-ginger/helpers"
 	"github.com/go-ginger/models"
 	"log"
 	"reflect"
@@ -75,10 +76,7 @@ func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) (err error) {
 }
 
 func (base *BaseDbHandler) handleSecondaryUpsert(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {
-	secondaryRequest := request.Populate(&models.Request{
-		ID:   request.GetID(),
-		Body: request.GetBody(),
-	})
+	secondaryRequest := helpers.Clone(request).(models.IRequest)
 	if secondaryDB.IsFullObjOnUpdateRequired() {
 		item, e := base.IBaseDbHandler.DoGet(secondaryRequest)
 		if e != nil {

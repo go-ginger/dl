@@ -4,8 +4,8 @@ github.com/gin-contrib/sse v0.0.0-20190301062529-5545eab6dad3 h1:t8FVkw33L+wilf2
 github.com/gin-contrib/sse v0.0.0-20190301062529-5545eab6dad3/go.mod h1:VJ0WA2NBN22VlZ2dKZQPAPnyWw5XTlK1KymzLKsr59s=
 github.com/gin-gonic/gin v1.4.0 h1:3tMoCCfM7ppqsR0ptz/wi1impNpT7/9wQtMZ8lr1mCQ=
 github.com/gin-gonic/gin v1.4.0/go.mod h1:OW2EZn3DO8Ln9oIKOvM++LBO+5UPHJJDH72/q/3rZdM=
-github.com/go-ginger/helpers v0.1.0 h1:46uHkfJ1KxP/ZaVXRNLOV2Os+J+N4VyG0iuTfLIx2bs=
-github.com/go-ginger/helpers v0.1.0/go.mod h1:Gsu1X7KIpaCt3Pj7sVoAFulEWwUQiwecyhQgdhhwCmc=
+github.com/go-ginger/helpers v0.1.1 h1:FYGJHerVALiGxIQ8pAnLuicHE60/S4+44ZMoCYU31oY=
+github.com/go-ginger/helpers v0.1.1/go.mod h1:Gsu1X7KIpaCt3Pj7sVoAFulEWwUQiwecyhQgdhhwCmc=
 github.com/go-ginger/models v0.3.0 h1:hAQiD59Fgvk8EM3Z8wcrlzB31gca7KKHrf3I76XOSOw=
 github.com/go-ginger/models v0.3.0/go.mod h1:fXUN2LwJlSG2/4TwYXzNfICKlQqsAeEd4NAvHbPgAzg=
 github.com/golang/protobuf v1.3.1 h1:YF8+flBXS5eO826T4nzqPrxfhQThhXl0YzfuUPu4SBg=
