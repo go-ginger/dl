@@ -41,6 +41,10 @@ type IBaseDbHandler interface {
 	Delete(request models.IRequest) error
 	AfterDelete(request models.IRequest) (err error)
 
+	StartTransaction(request models.IRequest) (err error)
+	CommitTransaction(request models.IRequest) (err error)
+	RollbackTransaction(request models.IRequest) (err error)
+
 	InsertInBackgroundEnabled() bool
 	UpdateInBackgroundEnabled() bool
 	DeleteInBackgroundEnabled() bool
