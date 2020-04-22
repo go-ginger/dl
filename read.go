@@ -132,10 +132,30 @@ func (base *BaseDbHandler) DoGet(request models.IRequest) (result models.IBaseMo
 	return
 }
 
+func (base *BaseDbHandler) DoGetFirst(request models.IRequest) (result models.IBaseModel, err error) {
+	err = base.IBaseDbHandler.BeforeQuery(request)
+	if err != nil {
+		return
+	}
+	result, err = base.IBaseDbHandler.First(request)
+	if err != nil {
+		return
+	}
+	err = base.IBaseDbHandler.AfterQuery(request, result)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (base *BaseDbHandler) Paginate(request models.IRequest) (*models.PaginateResult, error) {
 	return nil, nil
 }
 
 func (base *BaseDbHandler) Get(request models.IRequest) (models.IBaseModel, error) {
 	return nil, nil
+}
+
+func (base *BaseDbHandler) First(request models.IRequest) (result models.IBaseModel, err error) {
+	return
 }

@@ -16,6 +16,7 @@ type IBaseDbHandler interface {
 	DoInsert(request models.IRequest) (result interface{}, err error)
 	DoPaginate(request models.IRequest) (*models.PaginateResult, error)
 	DoGet(request models.IRequest) (models.IBaseModel, error)
+	DoGetFirst(request models.IRequest) (models.IBaseModel, error)
 	DoUpdate(request models.IRequest) error
 	DoUpsert(request models.IRequest) error
 	DoDelete(request models.IRequest) error
@@ -27,6 +28,7 @@ type IBaseDbHandler interface {
 	BeforeQuery(request models.IRequest) (err error)
 	Paginate(request models.IRequest) (*models.PaginateResult, error)
 	Get(request models.IRequest) (models.IBaseModel, error)
+	First(request models.IRequest) (result models.IBaseModel, err error)
 	AfterQuery(request models.IRequest, result interface{}) (err error)
 
 	BeforeUpdate(request models.IRequest) (err error)
