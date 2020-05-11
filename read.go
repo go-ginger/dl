@@ -139,8 +139,8 @@ func (base *BaseDbHandler) AfterQuery(request models.IRequest, result interface{
 					defer wg.Done()
 					base.handleModelAfterQuery(request, item, true, 3)
 				}(s.Index(i))
-				wg.Wait()
 			}
+			wg.Wait()
 		}
 	} else {
 		base.handleModelAfterQuery(request, result, false, 3)
