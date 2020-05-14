@@ -107,6 +107,12 @@ func (base *BaseDbHandler) AfterUpsert(request models.IRequest) (err error) {
 				}
 			}
 		}
+		if base.HasAnyDenormalizeConfig {
+			go base.IBaseDbHandler.DenormalizeNew(request.GetID())
+		}
+		if base.DenormalizeFieldRefConfigs != nil {
+			go base.IBaseDbHandler.EnsureDenormalizeByID(request.GetID())
+		}
 	}
 	return
 }

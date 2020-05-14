@@ -51,6 +51,17 @@ type IBaseDbHandler interface {
 	UpdateInBackgroundEnabled() bool
 	DeleteInBackgroundEnabled() bool
 	IsFullObjOnUpdateRequired() bool
+
+	IdEquals(id1 interface{}, id2 interface{}) bool
+
+	EnsureDenormalizeByID(id interface{})
+	NewDenormalizeConfig(configs ...*DenormalizeConfig)
+	NewDenormalizeReferenceConfig(configs ...*DenormalizeConfig)
+	DenormalizeNew(id interface{})
+	DenormalizeDelete(id interface{})
+	DenormalizeNewEntity(entityValue reflect.Value, newEntityValue reflect.Value, info *DenormalizeConfig)
+	DenormalizeDeleteEntity(entityValue reflect.Value, deletedEntityID interface{}, info *DenormalizeConfig)
+	EnsureDenormalizeInterface(id, entity interface{})
 }
 
 type BaseDbHandler struct {
@@ -67,6 +78,10 @@ type BaseDbHandler struct {
 	UpdateInBackground           bool
 	DeleteInBackground           bool
 	IsFullObjectOnUpdateRequired bool
+
+	HasAnyDenormalizeConfig    bool
+	DenormalizeConfigs         []*DenormalizeConfig
+	DenormalizeFieldRefConfigs []*DenormalizeConfig // map for referenced fields
 }
 
 func (base *BaseDbHandler) Initialize(handler IBaseDbHandler, model interface{}) {
@@ -117,4 +132,8 @@ func (base *BaseDbHandler) DeleteInBackgroundEnabled() bool {
 
 func (base *BaseDbHandler) IsFullObjOnUpdateRequired() bool {
 	return base.IsFullObjectOnUpdateRequired
+}
+
+func (base *BaseDbHandler) IdEquals(id1 interface{}, id2 interface{}) bool {
+	return id1 == id2
 }

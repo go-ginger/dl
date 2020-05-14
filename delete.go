@@ -29,6 +29,9 @@ func (base *BaseDbHandler) AfterDelete(request models.IRequest) (err error) {
 				err = secondaryDB.DoDelete(request)
 			}
 		}
+		if base.HasAnyDenormalizeConfig {
+			go base.IBaseDbHandler.DenormalizeNew(request.GetID())
+		}
 	}
 	return
 }

@@ -54,6 +54,12 @@ func (base *BaseDbHandler) AfterInsert(request models.IRequest) (err error) {
 				_, err = secondaryDB.DoInsert(secondaryRequest)
 			}
 		}
+		if base.HasAnyDenormalizeConfig {
+			go base.IBaseDbHandler.DenormalizeNew(request.GetID())
+		}
+		if base.DenormalizeFieldRefConfigs != nil {
+			//go base.IBaseDbHandler.EnsureDenormalizeByID(request.GetID())
+		}
 	}
 	return
 }
