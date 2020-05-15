@@ -230,7 +230,7 @@ func (base *BaseDbHandler) EnsureDenormalizeInterface(id, entity interface{}) {
 				found := false
 				for j := 0; j < referenceField.Len(); j++ {
 					referenceID := referenceField.Index(j).Interface()
-					if base.IdEquals(itemID, referenceID) {
+					if base.IBaseDbHandler.IdEquals(itemID, referenceID) {
 						found = true
 						break
 					}
@@ -251,7 +251,7 @@ func (base *BaseDbHandler) EnsureDenormalizeInterface(id, entity interface{}) {
 						itemAddr = item.Addr()
 					}
 					itemID := itemAddr.MethodByName("GetID").Call([]reflect.Value{})[0].Interface()
-					if base.IdEquals(itemID, referenceID) {
+					if base.IBaseDbHandler.IdEquals(itemID, referenceID) {
 						found = true
 						break
 					}
