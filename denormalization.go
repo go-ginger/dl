@@ -196,16 +196,23 @@ func (base *BaseDbHandler) EnsureDenormalizeInterface(id, entity interface{}) {
 	}
 	for _, cfg := range base.DenormalizeFieldRefConfigs {
 		field := entityValue.FieldByName(cfg.TargetFieldName)
-		if entityValue.Kind() == reflect.Ptr {
-			entityValue = entityValue.Elem()
-		}
 		if !field.CanSet() {
 			log.Println("ensure denormalize: can not set field")
 			continue
 		}
 		referenceField := entityValue.FieldByName(cfg.ReferenceFieldName)
 		if helpers.IsEmptyValue(referenceField) {
-			field.Set(reflect.New(field.Type()))
+			el := reflect.New(field.Type())
+			if field.Kind() == reflect.Ptr {
+				if el.Kind() != reflect.Ptr {
+					el = el.Addr()
+				}
+			} else {
+				if el.Kind() == reflect.Ptr {
+					el = el.Elem()
+				}
+			}
+			field.Set(el)
 			continue
 		}
 		if referenceField.Kind() == reflect.Ptr {
@@ -267,7 +274,6 @@ func (base *BaseDbHandler) EnsureDenormalizeInterface(id, entity interface{}) {
 					field.Set(reflect.Append(field, resultValue))
 				}
 			}
-			break
 		}
 	}
 	body := entityValue.Addr().Interface().(models.IBaseModel)
