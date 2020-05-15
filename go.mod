@@ -4,5 +4,5 @@ go 1.12
 
 require (
 	github.com/go-ginger/helpers v0.1.1
-	github.com/go-ginger/models v0.3.8
+	github.com/go-ginger/models v0.3.9
 )

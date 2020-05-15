@@ -2,7 +2,6 @@ package dl
 
 import (
 	"fmt"
-	"github.com/go-ginger/helpers"
 	"github.com/go-ginger/models"
 	"log"
 	"reflect"
@@ -40,6 +39,9 @@ func (base *BaseDbHandler) DenormalizeNewEntity(entityValue reflect.Value, newEn
 	newEntityPtrValue := newEntityValue.Addr()
 	newEntityID := newEntityPtrValue.MethodByName("GetID").Call([]reflect.Value{})[0].Interface()
 	targetField := entityValue.FieldByName(info.TargetFieldName)
+	if targetField.Kind() == reflect.Ptr {
+		targetField = targetField.Elem()
+	}
 	if targetField.Kind() == reflect.Slice {
 		found := false
 		for i := 0; i < targetField.Len(); i++ {
@@ -201,62 +203,86 @@ func (base *BaseDbHandler) EnsureDenormalizeInterface(id, entity interface{}) {
 			continue
 		}
 		referenceField := entityValue.FieldByName(cfg.ReferenceFieldName)
-		if helpers.IsEmptyValue(referenceField) {
-			el := reflect.New(field.Type())
-			if field.Kind() == reflect.Ptr {
-				if el.Kind() != reflect.Ptr {
-					el = el.Addr()
-				}
-			} else {
-				if el.Kind() == reflect.Ptr {
-					el = el.Elem()
-				}
+		if referenceField.IsZero() {
+			typ := field.Type()
+			for typ.Kind() == reflect.Ptr {
+				typ = typ.Elem()
 			}
-			field.Set(el)
+			var el reflect.Value
+			switch typ.Kind() {
+			case reflect.Slice:
+				el = reflect.MakeSlice(typ, 0, 0)
+				break
+			default:
+				el = reflect.New(typ.Elem()).Elem()
+				break
+			}
+			item := reflect.New(el.Type())
+			item.Elem().Set(el)
+			field.Set(item)
 			continue
 		}
 		if referenceField.Kind() == reflect.Ptr {
 			referenceField = referenceField.Elem()
 		}
-		if field.Kind() == reflect.Slice && referenceField.Kind() == reflect.Slice {
-			// remove field extra items
-			for i := field.Len() - 1; i >= 0; i-- {
-				item := field.Index(i)
-				itemAddr := item
-				if item.Kind() != reflect.Ptr {
-					itemAddr = item.Addr()
-				}
-				itemID := itemAddr.MethodByName("GetID").Call([]reflect.Value{})[0].Interface()
-				found := false
-				for j := 0; j < referenceField.Len(); j++ {
-					referenceID := referenceField.Index(j).Interface()
-					if base.IBaseDbHandler.IdEquals(itemID, referenceID) {
-						found = true
-						break
+		fieldEl := field
+		if fieldEl.Kind() == reflect.Ptr {
+			fieldEl = fieldEl.Elem()
+		}
+		if referenceField.Kind() == reflect.Slice && (field.IsZero() || fieldEl.Kind() == reflect.Slice) {
+			if !field.IsZero() {
+				// remove field extra items
+				for i := fieldEl.Len() - 1; i >= 0; i-- {
+					item := fieldEl.Index(i)
+					itemAddr := item
+					if item.Kind() != reflect.Ptr {
+						itemAddr = item.Addr()
 					}
-				}
-				if !found {
-					// id not found so delete denormalized entity
-					field.Set(reflect.AppendSlice(field.Slice(0, i), field.Slice(i+1, field.Len())))
+					itemID := itemAddr.MethodByName("GetID").Call([]reflect.Value{})[0].Interface()
+					found := false
+					for j := 0; j < referenceField.Len(); j++ {
+						referenceID := referenceField.Index(j).Interface()
+						if base.IBaseDbHandler.IdEquals(itemID, referenceID) {
+							found = true
+							break
+						}
+					}
+					if !found {
+						// id not found so delete denormalized entity
+						fieldEl.Set(reflect.AppendSlice(fieldEl.Slice(0, i), fieldEl.Slice(i+1, fieldEl.Len())))
+					}
 				}
 			}
 			// add field missing items
 			for i := referenceField.Len() - 1; i >= 0; i-- {
 				referenceID := referenceField.Index(i).Interface()
 				found := false
-				for j := 0; j < field.Len(); j++ {
-					item := field.Index(j)
-					itemAddr := item
-					if item.Kind() != reflect.Ptr {
-						itemAddr = item.Addr()
-					}
-					itemID := itemAddr.MethodByName("GetID").Call([]reflect.Value{})[0].Interface()
-					if base.IBaseDbHandler.IdEquals(itemID, referenceID) {
-						found = true
-						break
+				if !field.IsZero() {
+					for j := 0; j < fieldEl.Len(); j++ {
+						item := fieldEl.Index(j)
+						itemAddr := item
+						if item.Kind() != reflect.Ptr {
+							itemAddr = item.Addr()
+						}
+						itemID := itemAddr.MethodByName("GetID").Call([]reflect.Value{})[0].Interface()
+						if base.IBaseDbHandler.IdEquals(itemID, referenceID) {
+							found = true
+							break
+						}
 					}
 				}
 				if !found {
+					if field.IsZero() {
+						typ := field.Type().Elem()
+						sliceValue := reflect.MakeSlice(typ, 0, 0)
+						if field.Kind() == reflect.Ptr {
+							sliceValuePtr := reflect.New(sliceValue.Type())
+							sliceValuePtr.Elem().Set(sliceValue)
+							sliceValue = sliceValuePtr
+						}
+						field.Set(sliceValue)
+						fieldEl = field.Elem()
+					}
 					// entity not found so find & add entity
 					result, err := cfg.TargetHandler.Get(&models.Request{
 						ID: referenceID,
@@ -268,10 +294,16 @@ func (base *BaseDbHandler) EnsureDenormalizeInterface(id, entity interface{}) {
 					if resultValue.Kind() == reflect.Ptr {
 						resultValue = resultValue.Elem()
 					}
-					if field.IsNil() {
-						field.Set(reflect.MakeSlice(field.Type(), 0, 0))
+					sliceValue := fieldEl
+					if fieldEl.Kind() == reflect.Ptr {
+						sliceValue = fieldEl.Elem()
 					}
-					field.Set(reflect.Append(field, resultValue))
+					sliceValue = reflect.Append(sliceValue, resultValue)
+					if fieldEl.Kind() == reflect.Ptr {
+						fieldEl.Elem().Set(sliceValue)
+					} else {
+						fieldEl.Set(sliceValue)
+					}
 				}
 			}
 		}
