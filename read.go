@@ -123,6 +123,17 @@ func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model 
 			}
 			wg.Wait()
 			break
+		case reflect.Slice:
+			wg := sync.WaitGroup{}
+			for i := 0; i < s.Len(); i++ {
+				wg.Add(1)
+				go func(item reflect.Value) {
+					defer wg.Done()
+					base.handleModelAfterQuery(request, item, true, 3)
+				}(s.Index(i))
+			}
+			wg.Wait()
+			break
 		}
 	}
 }
