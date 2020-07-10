@@ -199,7 +199,6 @@ func (base *BaseDbHandler) EnsureDenormalizeInterface(id, entity interface{}) {
 	for _, cfg := range base.DenormalizeFieldRefConfigs {
 		field := entityValue.FieldByName(cfg.TargetFieldName)
 		if !field.CanSet() {
-			log.Println("ensure denormalize: can not set field")
 			continue
 		}
 		referenceField := entityValue.FieldByName(cfg.ReferenceFieldName)
