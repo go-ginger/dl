@@ -8,12 +8,16 @@ import (
 )
 
 func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
-	base.handleReadOnlyFields(request)
-	req := request.GetBaseRequest()
-	if req.Body != nil {
-		req.Body.HandleUpdateDefaultValues()
-	}
+	base.HandleReadOnlyFields(request)
+	base.IBaseDbHandler.HandleUpdateDefaultValues(request)
 	return
+}
+
+func (base *BaseDbHandler) HandleUpdateDefaultValues(request models.IRequest) {
+	body := request.GetBody()
+	if body != nil {
+		body.HandleUpdateDefaultValues()
+	}
 }
 
 func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {

@@ -21,6 +21,9 @@ type IBaseDbHandler interface {
 	DoUpsert(request models.IRequest) error
 	DoDelete(request models.IRequest) error
 
+	HandleCreateDefaultValues(request models.IRequest)
+	HandleUpdateDefaultValues(request models.IRequest)
+
 	BeforeInsert(request models.IRequest) (err error)
 	Insert(request models.IRequest) (result interface{}, err error)
 	AfterInsert(request models.IRequest) (err error)

@@ -8,10 +8,13 @@ import (
 )
 
 func (base *BaseDbHandler) BeforeInsert(request models.IRequest) (err error) {
-	base.handleReadOnlyFields(request)
-	req := request.GetBaseRequest()
-	req.Body.HandleCreateDefaultValues()
+	base.HandleReadOnlyFields(request)
+	base.IBaseDbHandler.HandleCreateDefaultValues(request)
 	return
+}
+
+func (base *BaseDbHandler) HandleCreateDefaultValues(request models.IRequest) {
+	request.GetBody().HandleCreateDefaultValues()
 }
 
 func (base *BaseDbHandler) DoInsert(request models.IRequest) (result interface{}, err error) {

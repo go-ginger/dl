@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (base *BaseDbHandler) handleReadOnlyFields(request models.IRequest) {
+func (base *BaseDbHandler) HandleReadOnlyFields(request models.IRequest) {
 	req := request.GetBaseRequest()
 	if req.Body == nil {
 		return
@@ -69,7 +69,7 @@ func (base *BaseDbHandler) handleReadOnlyFields(request models.IRequest) {
 }
 
 func (base *BaseDbHandler) BeforeUpsert(request models.IRequest) (err error) {
-	base.handleReadOnlyFields(request)
+	base.HandleReadOnlyFields(request)
 	req := request.GetBaseRequest()
 	req.Body.HandleUpsertDefaultValues()
 	return
