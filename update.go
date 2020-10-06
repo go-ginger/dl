@@ -1,10 +1,7 @@
 package dl
 
 import (
-	"fmt"
-	"github.com/go-ginger/helpers"
 	"github.com/go-ginger/models"
-	"log"
 )
 
 func (base *BaseDbHandler) BeforeUpdate(request models.IRequest) (err error) {
@@ -20,41 +17,7 @@ func (base *BaseDbHandler) HandleUpdateDefaultValues(request models.IRequest) {
 	}
 }
 
-func (base *BaseDbHandler) handleSecondaryUpdate(request models.IRequest, secondaryDB IBaseDbHandler) (err error) {
-	secondaryRequest := helpers.Clone(request).(models.IRequest)
-	if secondaryDB.IsFullObjOnUpdateRequired() {
-		objID := request.GetID()
-		req := secondaryRequest.GetBaseRequest()
-		req.Filters = &models.Filters{
-			"id": objID,
-		}
-		item, e := base.IBaseDbHandler.DoGet(secondaryRequest)
-		if e != nil {
-			err = e
-			return
-		}
-		secondaryRequest.SetBody(item)
-	}
-	err = secondaryDB.DoUpdate(secondaryRequest)
-	return
-}
-
 func (base *BaseDbHandler) AfterUpdate(request models.IRequest) (err error) {
-	if base.SecondaryDBs != nil {
-		for _, secondaryDB := range base.SecondaryDBs {
-			if secondaryDB.UpdateInBackgroundEnabled() {
-				go func(db IBaseDbHandler) {
-					err = base.handleSecondaryUpdate(request, db)
-					if err != nil {
-						log.Println(fmt.Sprintf("error on handleSecondaryUpdate, err: %v", err))
-						return
-					}
-				}(secondaryDB)
-			} else {
-				err = base.handleSecondaryUpdate(request, secondaryDB)
-			}
-		}
-	}
 	if base.HasAnyDenormalizeConfig {
 		go base.IBaseDbHandler.DenormalizeNew(request.GetID())
 	}

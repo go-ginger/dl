@@ -17,7 +17,7 @@ func (base *BaseDbHandler) HandleCreateDefaultValues(request models.IRequest) {
 	request.GetBody().HandleCreateDefaultValues()
 }
 
-func (base *BaseDbHandler) DoInsert(request models.IRequest) (result interface{}, err error) {
+func (base *BaseDbHandler) DoInsert(request models.IRequest) (result models.IBaseModel, err error) {
 	err = base.IBaseDbHandler.BeforeInsert(request)
 	if err != nil {
 		return
@@ -34,7 +34,7 @@ func (base *BaseDbHandler) DoInsert(request models.IRequest) (result interface{}
 	return
 }
 
-func (base *BaseDbHandler) Insert(request models.IRequest) (result interface{}, err error) {
+func (base *BaseDbHandler) Insert(request models.IRequest) (result models.IBaseModel, err error) {
 	return
 }
 

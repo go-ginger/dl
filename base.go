@@ -13,7 +13,7 @@ type IBaseDbHandler interface {
 	GetModelInstance() interface{}
 	GetBaseDbHandler() IBaseDbHandler
 
-	DoInsert(request models.IRequest) (result interface{}, err error)
+	DoInsert(request models.IRequest) (result models.IBaseModel, err error)
 	DoPaginate(request models.IRequest) (*models.PaginateResult, error)
 	DoGet(request models.IRequest) (models.IBaseModel, error)
 	DoGetFirst(request models.IRequest) (models.IBaseModel, error)
@@ -25,7 +25,7 @@ type IBaseDbHandler interface {
 	HandleUpdateDefaultValues(request models.IRequest)
 
 	BeforeInsert(request models.IRequest) (err error)
-	Insert(request models.IRequest) (result interface{}, err error)
+	Insert(request models.IRequest) (result models.IBaseModel, err error)
 	AfterInsert(request models.IRequest) (err error)
 
 	BeforeQuery(request models.IRequest) (err error)
@@ -65,6 +65,8 @@ type IBaseDbHandler interface {
 	DenormalizeNewEntity(entityValue reflect.Value, newEntityValue reflect.Value, info *DenormalizeConfig)
 	DenormalizeDeleteEntity(entityValue reflect.Value, deletedEntityID interface{}, info *DenormalizeConfig)
 	EnsureDenormalizeInterface(id, entity interface{})
+
+	GetSecondaryDBs() []IBaseDbHandler
 }
 
 type BaseDbHandler struct {
@@ -139,4 +141,8 @@ func (base *BaseDbHandler) IsFullObjOnUpdateRequired() bool {
 
 func (base *BaseDbHandler) IdEquals(id1 interface{}, id2 interface{}) bool {
 	return id1 == id2
+}
+
+func (base *BaseDbHandler) GetSecondaryDBs() []IBaseDbHandler {
+	return base.SecondaryDBs
 }
