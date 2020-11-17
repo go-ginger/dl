@@ -36,6 +36,9 @@ func (base *BaseDbHandler) beginHandleModelAfterQuery(request models.IRequest, m
 
 func (base *BaseDbHandler) handleModelAfterQuery(request models.IRequest, model interface{},
 	isValue bool, remainingDepth int) {
+	if model == nil {
+		return
+	}
 	if remainingDepth == 0 {
 		return
 	}
