@@ -223,3 +223,11 @@ func (base *BaseDbHandler) Get(request models.IRequest) (models.IBaseModel, erro
 func (base *BaseDbHandler) First(request models.IRequest) (result models.IBaseModel, err error) {
 	return
 }
+
+func (base *BaseDbHandler) Exists(request models.IRequest) (exists bool, err error) {
+	return
+}
+
+func (base *BaseDbHandler) Count(request models.IRequest) (count uint64, err error) {
+	return
+}

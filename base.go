@@ -32,6 +32,8 @@ type IBaseDbHandler interface {
 	Paginate(request models.IRequest) (*models.PaginateResult, error)
 	Get(request models.IRequest) (models.IBaseModel, error)
 	First(request models.IRequest) (result models.IBaseModel, err error)
+	Exists(request models.IRequest) (exists bool, err error)
+	Count(request models.IRequest) (count uint64, err error)
 	AfterQuery(request models.IRequest, result interface{}) (err error)
 
 	BeforeUpdate(request models.IRequest) (err error)
